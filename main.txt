@@ -1,0 +1,56 @@
+POS = I
+ANGLE = POS/ELECTRIAL_GEAR/JIANSUBI*360
+SUPPOSE TORQUE=ANGLE*2
+CURRENT = DO SOMETHING WITH TORQUE
+
+//定义电子齿轮，减速比，摩擦系数等常数
+RX4 -1
+RX5 2
+RX6 20000*50/360
+RX7 20000
+RX8 50
+RX9 0.1
+RX: L1
+RX; L2
+
+//设置控制模式
+CM1
+
+//是否需要进行通讯，由上位机进行数据处理？
+//先考虑不进行通讯的情况：
+//获得当前角度值,存在寄存器0中
+R/I6
+//将本次角度保存在寄存器1中供比较使用
+RM01
+//计算需要的力矩
+R*05
+//计算需要的电流
+RD0
+//设置电流值
+RM0G
+//等待上位机定时器中断
+WI3R
+
+LABEL LOOP
+R/I6
+//判断正转还是反转
+CR01
+//如果reg0大于reg1，则说明电机正转，电流给正值，否则给负值
+QJL LABEL_CCW
+RM01
+R*05
+RD0
+RM0G
+WI3R
+QG LABEL_LOOP
+
+
+LABEL_CCW
+RM01
+R*05
+RD0
+//反向电流为负值
+R*04
+RM0G
+WI3R
+QG LABEL_LOOP
